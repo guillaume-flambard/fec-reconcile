@@ -1,26 +1,43 @@
 import { Component, input, model, output, signal } from '@angular/core';
+import { NgIcon, provideIcons } from '@ng-icons/core';
+import { lucideFileCheck, lucideUpload } from '@ng-icons/lucide';
 
-/** A large zone that takes one file, by drag and drop or by click. */
+/** A large zone that takes one file, by drag and drop or by click. Spartan has no file input. */
 @Component({
   selector: 'app-file-drop',
-  host: { class: 'drop-host' },
+  imports: [NgIcon],
+  providers: [provideIcons({ lucideUpload, lucideFileCheck })],
+  host: { class: 'block min-w-0' },
   template: `
     <label
-      class="drop"
-      [class.drop-over]="over()"
-      [class.drop-filled]="file() !== null"
+      class="group flex h-full min-h-40 cursor-pointer flex-col gap-1 rounded-xl border-2 p-5 transition-colors focus-within:ring-3 focus-within:ring-ring/50"
+      [class]="
+        over()
+          ? 'border-solid border-primary bg-accent'
+          : file()
+            ? 'border-solid border-border bg-card'
+            : 'border-dashed border-input bg-muted/40 hover:border-primary hover:bg-accent'
+      "
       (dragover)="onDragOver($event)"
       (dragleave)="over.set(false)"
       (drop)="onDrop($event)"
     >
-      <input class="visually-hidden" type="file" [accept]="accept()" (change)="onChange($event)" />
-      <span class="drop-kicker">{{ kicker() }}</span>
-      <span class="drop-title">{{ title() }}</span>
+      <input class="sr-only" type="file" [accept]="accept()" (change)="onChange($event)" />
+      <span class="font-display text-sm font-medium tracking-widest text-muted-foreground uppercase">
+        {{ kicker() }}
+      </span>
+      <span class="font-display text-xl leading-tight font-medium">{{ title() }}</span>
       @if (file(); as f) {
-        <span class="drop-file">{{ f.name }}</span>
-        <span class="drop-hint">Cliquez pour changer de fichier</span>
+        <span class="mt-auto flex items-center gap-2 font-medium break-all">
+          <ng-icon name="lucideFileCheck" class="shrink-0 text-success" />
+          {{ f.name }}
+        </span>
+        <span class="text-sm text-muted-foreground">Cliquez pour changer de fichier</span>
       } @else {
-        <span class="drop-hint">{{ hint() }}</span>
+        <span class="mt-auto flex items-center gap-2 text-sm text-muted-foreground">
+          <ng-icon name="lucideUpload" class="shrink-0" />
+          {{ hint() }}
+        </span>
       }
     </label>
   `,

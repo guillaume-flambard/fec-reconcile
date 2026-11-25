@@ -36,6 +36,12 @@ module.exports = defineConfig([
   {
     files: ['**/*.html'],
     extends: [angular.configs.templateRecommended, angular.configs.templateAccessibility],
-    rules: {},
+    rules: {
+      // spartan's radio and checkbox render a native input inside: a label that wraps them is associated.
+      '@angular-eslint/template/label-has-associated-control': [
+        'error',
+        { controlComponents: ['hlm-radio', 'hlm-checkbox'] },
+      ],
+    },
   },
 ]);

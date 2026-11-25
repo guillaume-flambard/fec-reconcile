@@ -4,6 +4,7 @@ backend/target/
 frontend/node_modules/
 frontend/dist/
 frontend/.angular/
+frontend/.nx/
 # Editors and OS
 .idea/
 .vscode/

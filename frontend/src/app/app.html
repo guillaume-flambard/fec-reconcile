@@ -1,176 +1,240 @@
-<div class="field" aria-hidden="true"></div>
+<div class="min-h-dvh bg-[radial-gradient(80rem_32rem_at_70%_-10%,oklch(0.93_0.04_235),transparent_70%)]">
+  <main class="mx-auto grid max-w-5xl grid-cols-[minmax(0,1fr)] gap-6 px-4 py-10 sm:py-14">
+    <header class="grid gap-3">
+      <p class="font-display text-sm font-medium tracking-widest text-muted-foreground uppercase">
+        Memo Labs · Preuve de bascule
+      </p>
+      <h1 class="font-display text-4xl leading-tight font-medium text-balance sm:text-5xl">
+        Votre nouveau logiciel a-t-il tout repris ?
+      </h1>
+      <p class="max-w-[62ch] text-lg text-pretty text-muted-foreground">
+        Donnez l'export comptable (FEC) de l'ancien logiciel et celui du nouveau. L'outil compare les soldes de chaque
+        compte et de chaque client ou fournisseur, et vous dit ce qui manque. Rien ne quitte cet ordinateur.
+      </p>
+    </header>
 
-<main class="page">
-  <header class="intro">
-    <p class="brand">Memo Labs · Preuve de bascule</p>
-    <h1>Votre nouveau logiciel a-t-il tout repris ?</h1>
-    <p class="lead">
-      Donnez l'export comptable (FEC) de l'ancien logiciel et celui du nouveau. L'outil compare les soldes de chaque
-      compte et de chaque client ou fournisseur, et vous dit ce qui manque. Rien ne quitte cet ordinateur.
-    </p>
-  </header>
-
-  <section class="sheet" aria-label="Les deux fichiers à comparer">
-    <div class="drops">
-      <app-file-drop
-        kicker="Avant"
-        title="FEC de l'ancien logiciel"
-        [(file)]="oldFec"
-        (picked)="onPicked()"
-      />
-      <span class="arrow" aria-hidden="true">→</span>
-      <app-file-drop
-        kicker="Après"
-        title="FEC du nouveau logiciel"
-        [(file)]="newFec"
-        (picked)="onPicked()"
-      />
-    </div>
-
-    <details class="advanced">
-      <summary>Réglages avancés</summary>
-      <div class="advanced-body">
-        <app-file-drop
-          kicker="Facultatif"
-          title="Table de correspondance des comptes"
-          hint="Si les numéros de comptes ont changé : un fichier CSV, une ligne « ancien ; nouveau »"
-          accept=".csv,.txt"
-          [(file)]="mapping"
-          (picked)="onPicked()"
-        />
-        <fieldset class="options">
-          <legend>Ce qu'on compare</legend>
-          <label class="choice">
-            <input type="radio" name="mode" value="AUTO" [checked]="mode() === 'AUTO'" (change)="setMode($event)" />
-            Automatique (recommandé)
-          </label>
-          <label class="choice">
-            <input type="radio" name="mode" value="OPENING" [checked]="mode() === 'OPENING'" (change)="setMode($event)" />
-            Les soldes de fin de l'ancien contre les soldes de reprise du nouveau
-          </label>
-          <label class="choice">
-            <input type="radio" name="mode" value="FULL" [checked]="mode() === 'FULL'" (change)="setMode($event)" />
-            Les deux fichiers en entier, quand tout l'historique a été repris
-          </label>
-          <label class="text-field">
-            <span>Codes des journaux de reprise</span>
-            <input type="text" [value]="openingJournals()" (input)="setJournals($event)" />
-          </label>
-          <label class="choice">
-            <input type="checkbox" [checked]="balanceSheetOnly()" (change)="setBalanceSheetOnly($event)" />
-            Ignorer les charges et produits (comptes 6 et 7), pour une bascule en fin d'année
-          </label>
-          <button type="button" class="secondary" [disabled]="!oldFec() || !newFec()" (click)="compare()">
-            Relancer la comparaison
-          </button>
-        </fieldset>
-      </div>
-    </details>
-  </section>
-
-  <section class="result" aria-live="polite" aria-labelledby="result-title">
-    @switch (state()) {
-      @case ('waiting') {
-        <h2 id="result-title" class="verdict verdict-quiet">En attente des fichiers</h2>
-        <p class="result-lead">{{ waitingFor() }}</p>
-      }
-      @case ('loading') {
-        <h2 id="result-title" class="verdict verdict-quiet">Comparaison en cours</h2>
-        <p class="result-lead">Lecture des deux fichiers et calcul des soldes, compte par compte.</p>
-      }
-      @case ('error') {
-        <div class="problem" role="alert">
-          <h2 id="result-title" class="verdict">La comparaison n'a pas pu se faire</h2>
-          <p class="result-lead">{{ error() }}</p>
+    <section hlmCard class="shadow-lg shadow-slate-900/5" aria-label="Les deux fichiers à comparer">
+      <div hlmCardContent class="grid grid-cols-[minmax(0,1fr)] gap-6">
+        <div class="grid grid-cols-[minmax(0,1fr)] items-stretch gap-3 md:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)]">
+          <app-file-drop kicker="Avant" title="FEC de l'ancien logiciel" [(file)]="oldFec" (picked)="onPicked()" />
+          <ng-icon
+            name="lucideArrowRight"
+            size="24"
+            class="self-center justify-self-center rotate-90 text-muted-foreground md:rotate-0"
+            aria-hidden="true"
+          />
+          <app-file-drop kicker="Après" title="FEC du nouveau logiciel" [(file)]="newFec" (picked)="onPicked()" />
         </div>
-      }
-      @case ('done') {
-        @if (report(); as r) {
-          @if (isExample()) {
-            <p class="example-note">
-              Exemple : les Ateliers Dubois, une entreprise fictive qui change de logiciel au 30 juin. Déposez vos
-              propres fichiers au-dessus pour comparer les vôtres.
-            </p>
-          }
-          <h2 id="result-title" class="verdict" [class.verdict-ok]="differenceCount() === 0">{{ verdict() }}</h2>
-          <p class="result-lead">
-            @if (differenceCount() === 0) {
-              Les {{ matchingAccounts() }} comptes et {{ matchingThirdParties() }} clients ou fournisseurs ont le même
-              solde avant et après la bascule.
-            } @else {
-              {{ matchingAccounts() }} comptes et {{ matchingThirdParties() }} clients ou fournisseurs concordent.
-              Voici ce qui ne correspond pas.
-            }
-          </p>
 
-          @if (differenceCount() > 0) {
-            <ol class="findings">
-              @for (f of accountFindings(); track f.key) {
-                <li [class]="'finding finding-' + f.kind">
-                  <span class="finding-status">{{ f.status }}</span>
-                  <span class="finding-title">{{ f.title }}</span>
-                  <span class="finding-sentence">{{ f.sentence }}</span>
-                  @if (f.hint) {
-                    <span class="finding-hint">{{ f.hint }}</span>
-                  }
-                </li>
-              }
-              @for (f of thirdPartyFindings(); track f.key) {
-                <li [class]="'finding finding-' + f.kind">
-                  <span class="finding-status">{{ f.status }}</span>
-                  <span class="finding-title">{{ f.title }}</span>
-                  <span class="finding-sentence">{{ f.sentence }}</span>
-                </li>
-              }
-            </ol>
-          }
+        <hlm-accordion>
+          <hlm-accordion-item>
+            <hlm-accordion-trigger>Réglages avancés</hlm-accordion-trigger>
+            <hlm-accordion-content>
+              <div class="grid gap-6 pt-2 md:grid-cols-2">
+                <app-file-drop
+                  kicker="Facultatif"
+                  title="Table de correspondance des comptes"
+                  hint="Si les numéros de comptes ont changé : un CSV, une ligne « ancien ; nouveau »"
+                  accept=".csv,.txt"
+                  [(file)]="mapping"
+                  (picked)="onPicked()"
+                />
+                <fieldset hlmFieldSet>
+                  <legend hlmFieldLegend>Ce qu'on compare</legend>
+                  <hlm-radio-group [value]="mode()" (valueChange)="setMode($event)">
+                    <label class="flex items-center gap-3 text-sm" hlmLabel>
+                      <hlm-radio value="AUTO" aria-label="Automatique (recommandé)"><hlm-radio-indicator indicator /></hlm-radio>
+                      Automatique (recommandé)
+                    </label>
+                    <label class="flex items-center gap-3 text-sm" hlmLabel>
+                      <hlm-radio value="OPENING" aria-label="Soldes de fin de l'ancien contre soldes de reprise du nouveau"><hlm-radio-indicator indicator /></hlm-radio>
+                      Soldes de fin de l'ancien contre soldes de reprise du nouveau
+                    </label>
+                    <label class="flex items-center gap-3 text-sm" hlmLabel>
+                      <hlm-radio value="FULL" aria-label="Les deux fichiers en entier"><hlm-radio-indicator indicator /></hlm-radio>
+                      Les deux fichiers en entier, quand tout l'historique a été repris
+                    </label>
+                  </hlm-radio-group>
+                  <div hlmField>
+                    <label hlmFieldLabel for="journals">Codes des journaux de reprise</label>
+                    <input
+                      hlmInput
+                      id="journals"
+                      class="h-11 max-w-64"
+                      [value]="openingJournals()"
+                      (input)="setJournals($event)"
+                    />
+                  </div>
+                  <label class="flex items-center gap-3 text-sm" hlmLabel>
+                    <hlm-checkbox aria-label="Ignorer les charges et produits" [checked]="balanceSheetOnly()" (checkedChange)="balanceSheetOnly.set($event)" />
+                    Ignorer les charges et produits (comptes 6 et 7), pour une bascule en fin d'année
+                  </label>
+                  <button
+                    hlmBtn
+                    variant="outline"
+                    size="lg"
+                    class="min-h-11 justify-self-start"
+                    [disabled]="!oldFec() || !newFec()"
+                    (click)="compare()"
+                  >
+                    Relancer la comparaison
+                  </button>
+                </fieldset>
+              </div>
+            </hlm-accordion-content>
+          </hlm-accordion-item>
+        </hlm-accordion>
+      </div>
+    </section>
 
-          @if (r.warnings.length > 0) {
-            <div class="warnings">
-              <h3>À vérifier aussi</h3>
-              <ul>
-                @for (w of r.warnings; track $index) {
-                  <li>{{ w }}</li>
-                }
-              </ul>
+    <section hlmCard class="rise shadow-lg shadow-slate-900/5" aria-live="polite" aria-labelledby="result-title">
+      <div hlmCardContent class="grid grid-cols-[minmax(0,1fr)] gap-5">
+        @switch (state()) {
+          @case ('waiting') {
+            <h2 id="result-title" class="font-voice text-4xl">En attente des fichiers</h2>
+            <p class="text-muted-foreground">{{ waitingFor() }}</p>
+          }
+          @case ('loading') {
+            <div class="flex items-center gap-3">
+              <hlm-spinner />
+              <h2 id="result-title" class="font-voice text-4xl">Comparaison en cours</h2>
             </div>
+            <p class="text-muted-foreground">Lecture des deux fichiers et calcul des soldes, compte par compte.</p>
           }
-
-          <div class="actions">
-            <button type="button" class="primary" (click)="downloadCsv()">
-              Télécharger le rapport pour l'expert-comptable
-            </button>
-            <span class="actions-note">Fichier CSV qui s'ouvre dans Excel, avec chaque compte avant et après.</span>
-          </div>
-
-          <details class="more">
-            <summary>Voir le détail compte par compte</summary>
-            <app-balance-table [lines]="r.accounts" keyLabel="Compte" caption="Soldes par compte" [showOldAccounts]="true" />
-          </details>
-          <details class="more">
-            <summary>Voir le détail par client et fournisseur</summary>
-            <app-balance-table [lines]="r.thirdParties" keyLabel="Tiers" caption="Soldes par client et fournisseur" />
-          </details>
-          <details class="more">
-            <summary>Ce que l'outil a lu</summary>
-            <dl class="files-read">
-              @for (f of [r.oldFile, r.newFile]; track $index) {
-                <dt>{{ $index === 0 ? 'Avant' : 'Après' }}</dt>
-                <dd>
-                  {{ f.name }} : {{ f.entryLines | number }} lignes, dont {{ f.comparedLines | number }} comparées ;
-                  {{ f.balanced ? 'débit et crédit équilibrés' : 'débit et crédit déséquilibrés' }} ; {{ f.encoding }},
-                  séparateur {{ f.separator }}.
-                </dd>
+          @case ('error') {
+            <hlm-alert variant="destructive" role="alert">
+              <ng-icon name="lucideCircleAlert" />
+              <h2 hlmAlertTitle id="result-title">La comparaison n'a pas pu se faire</h2>
+              <p hlmAlertDescription>{{ error() }}</p>
+            </hlm-alert>
+          }
+          @case ('done') {
+            @if (report(); as r) {
+              @if (isExample()) {
+                <hlm-alert class="max-w-[76ch]">
+                  <ng-icon name="lucideInfo" />
+                  <h3 hlmAlertTitle>Exemple</h3>
+                  <p hlmAlertDescription>
+                    Les Ateliers Dubois, une entreprise fictive, changent de logiciel au 30 juin. Déposez vos propres
+                    fichiers au-dessus pour comparer les vôtres.
+                  </p>
+                </hlm-alert>
               }
-            </dl>
-          </details>
-        }
-      }
-    }
-  </section>
+              <div class="grid gap-2">
+                <h2
+                  id="result-title"
+                  class="font-voice text-4xl leading-tight sm:text-5xl"
+                  [class]="differenceCount() === 0 ? 'text-success' : 'text-destructive'"
+                >
+                  {{ verdict() }}
+                </h2>
+                <p class="max-w-[68ch] text-lg text-muted-foreground">
+                  @if (differenceCount() === 0) {
+                    Les {{ matchingAccounts() }} comptes et {{ matchingThirdParties() }} clients ou fournisseurs ont le
+                    même solde avant et après la bascule.
+                  } @else {
+                    {{ matchingAccounts() }} comptes et {{ matchingThirdParties() }} clients ou fournisseurs concordent.
+                    Voici ce qui ne correspond pas.
+                  }
+                </p>
+              </div>
 
-  <footer class="foot">
-    Outil libre de Memo Labs. Code source :
-    <a href="https://github.com/guillaume-flambard/fec-reconcile">github.com/guillaume-flambard/fec-reconcile</a>
-  </footer>
-</main>
+              @if (differenceCount() > 0) {
+                <ol class="grid max-w-[76ch] gap-3">
+                  @for (f of allFindings(); track f.key) {
+                    <li
+                      class="grid gap-1 rounded-r-lg border-l-4 px-5 py-4"
+                      [class]="
+                        f.kind === 'extra' ? 'border-warning bg-warning-soft' : 'border-destructive bg-destructive-soft'
+                      "
+                    >
+                      <span
+                        class="font-display text-sm font-medium tracking-wider uppercase"
+                        [class]="f.kind === 'extra' ? 'text-warning' : 'text-destructive'"
+                      >
+                        {{ f.status }}
+                      </span>
+                      <span class="font-semibold">{{ f.title }}</span>
+                      <span class="tabular-nums">{{ f.sentence }}</span>
+                      @if (f.hint) {
+                        <span class="text-sm text-muted-foreground">{{ f.hint }}</span>
+                      }
+                    </li>
+                  }
+                </ol>
+              }
+
+              @if (r.warnings.length > 0) {
+                <hlm-alert class="max-w-[76ch]">
+                  <ng-icon name="lucideTriangleAlert" />
+                  <h3 hlmAlertTitle>À vérifier aussi</h3>
+                  <ul hlmAlertDescription class="list-disc pl-5">
+                    @for (w of r.warnings; track $index) {
+                      <li>{{ w }}</li>
+                    }
+                  </ul>
+                </hlm-alert>
+              }
+
+              <div class="flex flex-wrap items-center gap-x-4 gap-y-2">
+                <button hlmBtn size="lg" class="h-auto min-h-11 max-w-full shrink py-2 text-left whitespace-normal" (click)="downloadCsv()">
+                  <ng-icon name="lucideDownload" />
+                  Télécharger le rapport pour l'expert-comptable
+                </button>
+                <span class="text-sm text-muted-foreground">
+                  Fichier CSV qui s'ouvre dans Excel, avec chaque compte avant et après.
+                </span>
+              </div>
+
+              <hlm-accordion type="multiple">
+                <hlm-accordion-item>
+                  <hlm-accordion-trigger>Voir le détail compte par compte</hlm-accordion-trigger>
+                  <hlm-accordion-content>
+                    <app-balance-table
+                      [lines]="r.accounts"
+                      keyLabel="Compte"
+                      caption="Soldes par compte"
+                      [showOldAccounts]="true"
+                    />
+                  </hlm-accordion-content>
+                </hlm-accordion-item>
+                <hlm-accordion-item>
+                  <hlm-accordion-trigger>Voir le détail par client et fournisseur</hlm-accordion-trigger>
+                  <hlm-accordion-content>
+                    <app-balance-table
+                      [lines]="r.thirdParties"
+                      keyLabel="Tiers"
+                      caption="Soldes par client et fournisseur"
+                    />
+                  </hlm-accordion-content>
+                </hlm-accordion-item>
+                <hlm-accordion-item>
+                  <hlm-accordion-trigger>Ce que l'outil a lu</hlm-accordion-trigger>
+                  <hlm-accordion-content>
+                    <dl class="grid max-w-[76ch] grid-cols-[max-content_minmax(0,1fr)] gap-x-4 gap-y-2 text-sm">
+                      @for (f of [r.oldFile, r.newFile]; track $index) {
+                        <dt class="font-semibold">{{ $index === 0 ? 'Avant' : 'Après' }}</dt>
+                        <dd class="break-all">
+                          {{ f.name }} : {{ f.entryLines | number }} lignes, dont {{ f.comparedLines | number }}
+                          comparées ; {{ f.balanced ? 'débit et crédit équilibrés' : 'débit et crédit déséquilibrés' }} ;
+                          {{ f.encoding }}, séparateur {{ f.separator }}.
+                        </dd>
+                      }
+                    </dl>
+                  </hlm-accordion-content>
+                </hlm-accordion-item>
+              </hlm-accordion>
+            }
+          }
+        }
+      </div>
+    </section>
+
+    <footer class="text-center text-sm text-muted-foreground">
+      Outil libre de Memo Labs. Code source :
+      <a class="underline underline-offset-4 hover:text-foreground" href="https://github.com/guillaume-flambard/fec-reconcile">
+        github.com/guillaume-flambard/fec-reconcile
+      </a>
+    </footer>
+  </main>
+</div>

@@ -1,6 +1,24 @@
 import { DecimalPipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, computed, inject, signal } from '@angular/core';
+import { NgIcon, provideIcons } from '@ng-icons/core';
+import {
+  lucideArrowRight,
+  lucideCircleAlert,
+  lucideDownload,
+  lucideInfo,
+  lucideTriangleAlert,
+} from '@ng-icons/lucide';
+import { HlmAccordionImports } from '@spartan-ng/helm/accordion';
+import { HlmAlertImports } from '@spartan-ng/helm/alert';
+import { HlmButtonImports } from '@spartan-ng/helm/button';
+import { HlmCardImports } from '@spartan-ng/helm/card';
+import { HlmCheckboxImports } from '@spartan-ng/helm/checkbox';
+import { HlmFieldImports } from '@spartan-ng/helm/field';
+import { HlmInputImports } from '@spartan-ng/helm/input';
+import { HlmLabelImports } from '@spartan-ng/helm/label';
+import { HlmRadioGroupImports } from '@spartan-ng/helm/radio-group';
+import { HlmSpinnerImports } from '@spartan-ng/helm/spinner';
 import { BalanceTable } from './balance-table';
 import { FileDrop } from './file-drop';
 import { findings } from './finding';
@@ -16,7 +34,23 @@ const SAMPLE_FILES = {
 };
 
 @Component({
-  imports: [DecimalPipe, BalanceTable, FileDrop],
+  imports: [
+    DecimalPipe,
+    NgIcon,
+    BalanceTable,
+    FileDrop,
+    HlmAccordionImports,
+    HlmAlertImports,
+    HlmButtonImports,
+    HlmCardImports,
+    HlmCheckboxImports,
+    HlmFieldImports,
+    HlmInputImports,
+    HlmLabelImports,
+    HlmRadioGroupImports,
+    HlmSpinnerImports,
+  ],
+  providers: [provideIcons({ lucideArrowRight, lucideCircleAlert, lucideDownload, lucideInfo, lucideTriangleAlert })],
   selector: 'app-root',
   templateUrl: './app.html',
 })
@@ -40,6 +74,7 @@ export class App {
   protected readonly thirdPartyFindings = computed(() =>
     findings(this.report()?.thirdParties ?? [], 'thirdParty'),
   );
+  protected readonly allFindings = computed(() => [...this.accountFindings(), ...this.thirdPartyFindings()]);
   protected readonly differenceCount = computed(
     () => this.accountFindings().length + this.thirdPartyFindings().length,
   );
@@ -85,16 +120,12 @@ export class App {
     }
   }
 
-  protected setMode(event: Event): void {
-    this.mode.set((event.target as HTMLInputElement).value as Mode);
+  protected setMode(value: unknown): void {
+    this.mode.set(value as Mode);
   }
 
   protected setJournals(event: Event): void {
     this.openingJournals.set((event.target as HTMLInputElement).value);
-  }
-
-  protected setBalanceSheetOnly(event: Event): void {
-    this.balanceSheetOnly.set((event.target as HTMLInputElement).checked);
   }
 
   protected async loadSample(): Promise<void> {

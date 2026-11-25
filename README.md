@@ -57,7 +57,8 @@ cd frontend && npx ng lint && npx ng test --watch=false && npx ng build
 
 ## Stack
 
-Java 25, Spring Boot 4.2, Maven; Angular 22 (standalone, zoneless, signals), Vitest, angular-eslint.
+Java 25, Spring Boot 4.2, Maven; Angular 22 (standalone, zoneless, signals), spartan/ui on
+Tailwind CSS 4, Vitest, angular-eslint.
 
 ## Licence
 

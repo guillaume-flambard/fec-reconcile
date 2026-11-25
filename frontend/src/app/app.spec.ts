@@ -73,7 +73,7 @@ describe('App', () => {
 
     const page = fixture.nativeElement as HTMLElement;
     expect(page.querySelector('#result-title')?.textContent).toContain('2 différences à expliquer.');
-    const items = [...page.querySelectorAll('.finding')].map((li) => li.textContent ?? '');
+    const items = [...page.querySelectorAll('ol li')].map((li) => li.textContent ?? '');
     expect(items).toHaveLength(2);
     expect(items[0]).toContain('Clients France (compte 411100, ancien 411000)');
     expect(items[1]).toContain('Garage Martin');
