@@ -53,3 +53,8 @@ cd frontend && npx ng lint && npx ng test --watch=false && npx ng build
 ## Stack
 
 Java 17, Spring Boot 4.2, Maven; Angular 22 (standalone, zoneless, signals), Vitest, angular-eslint.
+
+## Licence
+
+MIT, see `LICENSE`. The agent skills in `.claude/skills/` keep their own licences, listed in
+`.claude/skills/SOURCES.md`. The sample files describe a fictional company.
