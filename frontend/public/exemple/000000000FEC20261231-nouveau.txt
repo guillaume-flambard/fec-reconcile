@@ -1,0 +1,13 @@
+JournalCode|JournalLib|EcritureNum|EcritureDate|CompteNum|CompteLib|CompAuxNum|CompAuxLib|PieceRef|PieceDate|EcritureLib|Debit|Credit|EcritureLet|DateLet|ValidDate|Montantdevise|Idevise
+AN|Reprise|1|20260701|512100|Banque principale|||REPRISE|20260701|Reprise au 30/06|14040,00|0,00|||20260701||
+AN|Reprise|1|20260701|101300|Capital souscrit appelé versé|||REPRISE|20260701|Reprise au 30/06|0,00|10000,00|||20260701||
+AN|Reprise|1|20260701|401100|Fournisseurs France|F001|Bois du Jura|REPRISE|20260701|Reprise au 30/06|0,00|5000,00|||20260701||
+AN|Reprise|1|20260701|411100|Clients France|C001|Mairie de Lons|REPRISE|20260701|Reprise au 30/06|1200,00|0,00|||20260701||
+AN|Reprise|1|20260701|471000|Compte d'attente|||REPRISE|20260701|Reprise au 30/06|600,00|0,00|||20260701||
+AN|Reprise|1|20260701|706100|Prestations de services|||REPRISE|20260701|Reprise au 30/06|0,00|1500,00|||20260701||
+AN|Reprise|1|20260701|445711|TVA collectée 20 %|||REPRISE|20260701|Reprise au 30/06|0,00|300,00|||20260701||
+AN|Reprise|1|20260701|607100|Achats de matières|||REPRISE|20260701|Reprise au 30/06|800,00|0,00|||20260701||
+AN|Reprise|1|20260701|445661|TVA déductible 20 %|||REPRISE|20260701|Reprise au 30/06|160,00|0,00|||20260701||
+VT|Ventes|2|20260710|411100|Clients France|C001|Mairie de Lons|FV2026-001|20260710|Escalier|2400,00|0,00|||20260710||
+VT|Ventes|2|20260710|706100|Prestations de services|||FV2026-001|20260710|Escalier|0,00|2000,00|||20260710||
+VT|Ventes|2|20260710|445711|TVA collectée 20 %|||FV2026-001|20260710|Escalier|0,00|400,00|||20260710||

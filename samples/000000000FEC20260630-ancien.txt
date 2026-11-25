@@ -1,0 +1,15 @@
+JournalCode	JournalLib	EcritureNum	EcritureDate	CompteNum	CompteLib	CompAuxNum	CompAuxLib	PieceRef	PieceDate	EcritureLib	Debit	Credit	EcritureLet	DateLet	ValidDate	Montantdevise	Idevise
+AN	À-nouveaux	1	20260101	512000	Banque			AN26	20260101	Reprise	15000,00	0,00			20260101		
+AN	À-nouveaux	1	20260101	101000	Capital			AN26	20260101	Reprise	0,00	10000,00			20260101		
+AN	À-nouveaux	1	20260101	401000	Fournisseurs	F001	Bois du Jura	AN26	20260101	Reprise	0,00	5000,00			20260101		
+VE	Ventes	2	20260215	411000	Clients	C001	Mairie de Lons	FA101	20260215	Façade mairie	1200,00	0,00			20260215		
+VE	Ventes	2	20260215	706000	Prestations			FA101	20260215	Façade mairie	0,00	1000,00			20260215		
+VE	Ventes	2	20260215	445710	TVA collectée			FA101	20260215	Façade mairie	0,00	200,00			20260215		
+AC	Achats	3	20260310	607000	Achats			BJ55	20260310	Chêne	800,00	0,00			20260310		
+AC	Achats	3	20260310	445660	TVA déductible			BJ55	20260310	Chêne	160,00	0,00			20260310		
+AC	Achats	3	20260310	401000	Fournisseurs	F001	Bois du Jura	BJ55	20260310	Chêne	0,00	960,00			20260310		
+BQ	Banque	4	20260420	512000	Banque			VIR12	20260420	Règlement BJ55	0,00	960,00			20260420		
+BQ	Banque	4	20260420	401000	Fournisseurs	F001	Bois du Jura	VIR12	20260420	Règlement BJ55	960,00	0,00			20260420		
+VE	Ventes	5	20260505	411000	Clients	C002	Garage Martin	FA102	20260505	Portail garage	600,00	0,00			20260505		
+VE	Ventes	5	20260505	706000	Prestations			FA102	20260505	Portail garage	0,00	500,00			20260505		
+VE	Ventes	5	20260505	445710	TVA collectée			FA102	20260505	Portail garage	0,00	100,00			20260505		

@@ -1,0 +1,149 @@
+<main class="page">
+  <header class="intro">
+    <h1>Rapprochement de FEC</h1>
+    <p class="lead">
+      Comparez la comptabilité de l'ancien et du nouveau logiciel, compte par compte et tiers par tiers, avant de
+      valider une bascule. Les fichiers sont lus sur cet ordinateur et ne sont envoyés nulle part.
+    </p>
+  </header>
+
+  <section class="panel" aria-labelledby="files-title">
+    <h2 id="files-title">Les fichiers</h2>
+    <div class="files">
+      <label class="field">
+        <span class="field-label">FEC de l'ancien système</span>
+        <input type="file" accept=".txt,.csv,.tsv" (change)="pick($event, oldFec)" />
+        <span class="hint">{{ oldFec()?.name ?? 'Obligatoire. Tabulation ou « | », UTF-8 ou ISO 8859-15.' }}</span>
+      </label>
+      <label class="field">
+        <span class="field-label">FEC du nouveau système</span>
+        <input type="file" accept=".txt,.csv,.tsv" (change)="pick($event, newFec)" />
+        <span class="hint">{{ newFec()?.name ?? 'Obligatoire. Avec les écritures de reprise (à-nouveaux).' }}</span>
+      </label>
+      <label class="field">
+        <span class="field-label">Table de correspondance des comptes</span>
+        <input type="file" accept=".csv,.txt" (change)="pick($event, mapping)" />
+        <span class="hint">{{ mapping()?.name ?? 'Facultative. Une ligne « ancien compte ; nouveau compte ».' }}</span>
+      </label>
+    </div>
+
+    <fieldset class="options">
+      <legend>Ce qu'on compare</legend>
+      <label class="choice">
+        <input type="radio" name="mode" value="AUTO" [checked]="mode() === 'AUTO'" (change)="setMode($event)" />
+        Automatique : les à-nouveaux s'ils existent, sinon tout le fichier
+      </label>
+      <label class="choice">
+        <input type="radio" name="mode" value="OPENING" [checked]="mode() === 'OPENING'" (change)="setMode($event)" />
+        Solde de l'ancien contre les à-nouveaux du nouveau
+      </label>
+      <label class="choice">
+        <input type="radio" name="mode" value="FULL" [checked]="mode() === 'FULL'" (change)="setMode($event)" />
+        Les deux fichiers en entier (même historique repris)
+      </label>
+      <div class="inline">
+        <label class="field compact">
+          <span class="field-label">Journaux d'à-nouveaux</span>
+          <input type="text" [value]="openingJournals()" (input)="setJournals($event)" />
+        </label>
+        <label class="choice">
+          <input type="checkbox" [checked]="balanceSheetOnly()" (change)="setBalanceSheetOnly($event)" />
+          Ignorer les classes 6 et 7 (bascule en fin d'exercice)
+        </label>
+      </div>
+    </fieldset>
+
+    <div class="actions">
+      <button type="button" class="primary" [disabled]="!canCompare()" (click)="compare()">
+        {{ state() === 'loading' ? 'Comparaison en cours…' : 'Comparer' }}
+      </button>
+      <button type="button" class="secondary" [disabled]="state() === 'loading'" (click)="loadSample()">
+        Essayer avec l'exemple
+      </button>
+    </div>
+  </section>
+
+  @if (state() === 'error') {
+    <section class="panel alert" role="alert">
+      <h2>Comparaison impossible</h2>
+      <p>{{ error() }}</p>
+    </section>
+  }
+
+  @if (state() === 'idle') {
+    <section class="panel empty">
+      <p>
+        Déposez les deux FEC, ou essayez l'exemple : une entreprise fictive qui change de logiciel au 30 juin, avec
+        deux erreurs de reprise à retrouver.
+      </p>
+    </section>
+  }
+
+  @if (report(); as r) {
+    <section class="panel" aria-labelledby="verdict-title" aria-live="polite">
+      @if (r.verdict === 'MATCH') {
+        <h2 id="verdict-title" class="verdict ok">Les soldes concordent</h2>
+        <p>Chaque compte et chaque tiers a le même solde dans les deux systèmes.</p>
+      } @else {
+        <h2 id="verdict-title" class="verdict ko">
+          {{ accountDifferences() }} compte(s) et {{ thirdPartyDifferences() }} tiers en écart
+        </h2>
+        <p>Chaque écart ci-dessous est à expliquer avant de valider la bascule.</p>
+      }
+      <p class="meta">{{ modeLabel() }}</p>
+
+      <div class="summaries">
+        @for (f of [r.oldFile, r.newFile]; track $index) {
+          <dl class="summary">
+            <dt>{{ $index === 0 ? 'Ancien' : 'Nouveau' }}</dt>
+            <dd class="file-name">{{ f.name }}</dd>
+            <dt>Lignes</dt>
+            <dd>{{ f.entryLines | number }} lues, {{ f.comparedLines | number }} comparées</dd>
+            <dt>Débit / crédit</dt>
+            <dd>{{ f.totalDebit | number: '1.2-2' }} / {{ f.totalCredit | number: '1.2-2' }}</dd>
+            <dt>Équilibre</dt>
+            <dd>{{ f.balanced ? 'Équilibré' : 'Déséquilibré' }}</dd>
+            <dt>Format</dt>
+            <dd>{{ f.encoding }}, {{ f.separator }}</dd>
+          </dl>
+        }
+      </div>
+
+      @if (r.warnings.length > 0) {
+        <div class="warnings">
+          <h3>À vérifier</h3>
+          <ul>
+            @for (w of r.warnings; track $index) {
+              <li>{{ w }}</li>
+            }
+          </ul>
+        </div>
+      }
+
+      <div class="actions">
+        <label class="choice">
+          <input type="checkbox" [checked]="onlyDifferences()" (change)="setOnlyDifferences($event)" />
+          N'afficher que les écarts
+        </label>
+        <button type="button" class="secondary" (click)="downloadCsv()">
+          Télécharger la table de réconciliation (CSV)
+        </button>
+      </div>
+    </section>
+
+    <section class="panel" aria-labelledby="accounts-title">
+      <h2 id="accounts-title">Comptes</h2>
+      <app-balance-table
+        [lines]="visibleAccounts()"
+        keyLabel="Compte"
+        caption="Soldes par compte"
+        [showOldAccounts]="true"
+      />
+    </section>
+
+    <section class="panel" aria-labelledby="third-title">
+      <h2 id="third-title">Tiers (clients et fournisseurs)</h2>
+      <app-balance-table [lines]="visibleThirdParties()" keyLabel="Tiers" caption="Soldes par tiers" />
+    </section>
+  }
+</main>
