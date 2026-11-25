@@ -44,7 +44,7 @@ public final class ReconciliationCsv {
     }
 
     private static String amount(BigDecimal value) {
-        return value.toPlainString().replace('.', ',');
+        return Amounts.french(value);
     }
 
     private static String cell(String value) {

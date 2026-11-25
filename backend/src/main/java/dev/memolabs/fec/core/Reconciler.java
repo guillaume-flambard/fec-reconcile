@@ -76,6 +76,13 @@ public final class Reconciler {
 
         List<Line> accounts = compareBy(oldEntries, newEntries, e -> mapping.map(e.compteNum()),
                 FecEntry::compteNum, FecEntry::compteLib);
+        long shared = accounts.stream().filter(l -> l.status() == Status.OK || l.status() == Status.DIFFERENCE).count();
+        if (accounts.size() >= 4 && shared * 2 < accounts.size()) {
+            // Most accounts exist on one side only: the numbering changed, not the balances.
+            warnings.addFirst("La plupart des comptes n'existent que d'un côté : les numéros de comptes ont "
+                    + "probablement changé. Ajoutez la table de correspondance (ancien compte ; nouveau compte) "
+                    + "dans les réglages avancés, sinon chaque compte apparaît comme un écart.");
+        }
         List<FecEntry> oldAux = oldEntries.stream().filter(FecEntry::hasAuxiliary).toList();
         List<FecEntry> newAux = newEntries.stream().filter(FecEntry::hasAuxiliary).toList();
         List<Line> thirdParties = compareBy(oldAux, newAux, FecEntry::compAuxNum, FecEntry::compAuxNum,

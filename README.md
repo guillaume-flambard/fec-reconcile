@@ -1,12 +1,39 @@
 # fec-reconcile
 
+**Votre nouveau logiciel comptable a-t-il tout repris ?** Quand une entreprise change de logiciel
+(Sage vers Odoo, NAV vers Business Central...), ses soldes doivent arriver à l'identique. Cet outil
+compare l'export comptable (FEC) de l'ancien logiciel à celui du nouveau, compte par compte et
+client ou fournisseur par client ou fournisseur, et dit en clair ce qui manque ou a changé.
+
+![L'écran de comparaison sur l'exemple fourni : trois différences retrouvées](docs/ecran-exemple.png)
+
+- **Ce qu'il trouve** : une facture client oubliée à la reprise, un montant rangé sur un compte
+  d'attente, un solde fournisseur au mauvais signe, un écart d'un centime.
+- **Ce qu'il produit** : la table de correspondance et de réconciliation que l'administration fiscale
+  demande quand le plan de comptes change ([BOFiP BOI-CF-IOR-60-40-20, § 400](https://bofip.impots.gouv.fr/bofip/9028-PGP.html/identifiant=BOI-CF-IOR-60-40-20-20170607)),
+  en CSV pour Excel.
+- **Confidentialité** : il tourne sur votre ordinateur. Les fichiers ne sont envoyés nulle part.
+- **Formats lus** : les FEC conformes au texte (tabulation ou « | », UTF-8 ou ISO 8859-15), et les
+  écarts courants : fichier réenregistré dans Excel avec des « ; », encodage Windows, guillemets,
+  dates en JJ/MM/AAAA. Testé sur des exports publics d'Odoo et de Tiime ; pas encore sur un export
+  Sage ou Cegid réel.
+
+Il sert d'instrument à la prestation « preuve de bascule » de Memo Labs :
+[memolabs.dev/fr/services/erp-cutover-proof](https://memolabs.dev/fr/services/erp-cutover-proof).
+Licence libre (MIT). L'installation demande Java 25 et Node.js (voir plus bas), ou une démonstration
+sur vos propres fichiers : contact@memolabs.dev.
+
+---
+
 Compare the accounting of an old system with the new one before an ERP cutover, from the two
 FEC files (fichier des écritures comptables, the export every French accounting software must
 produce). The tool lists every account and every third party whose balance differs, and writes
 the correspondence and reconciliation table that the tax administration asks for when a change
 of software also changes the chart of accounts.
 
-Status: prototype, 25 November 2026. Not yet tested on a real company's files.
+Status: prototype, 25 November 2026. Tested on eight public FEC files (including Odoo and Tiime
+exports), on a migration simulated from the Odoo file with three known mistakes (all three found,
+nothing else), and on 300 000 lines per file (3.6 s). Not yet run on a real company's migration.
 
 ## Why
 

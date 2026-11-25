@@ -84,6 +84,7 @@ class ReconcilerTest {
 
         assertThat(line(report.accounts(), "512000").status()).isEqualTo(Status.MISSING_IN_NEW);
         assertThat(line(report.accounts(), "512100").status()).isEqualTo(Status.MISSING_IN_OLD);
+        assertThat(report.warnings().getFirst()).contains("table de correspondance");
     }
 
     @Test
@@ -127,6 +128,6 @@ class ReconcilerTest {
 
         assertThat(csv).startsWith("\uFEFFType;Nouveau compte ou tiers");
         assertThat(csv).contains("Compte;411100;Clients France;411000;1800,00;1200,00;-600,00;Écart");
-        assertThat(csv).contains("Tiers;C002;Garage Martin;C002;600,00;0;-600,00;Absent du nouveau système");
+        assertThat(csv).contains("Tiers;C002;Garage Martin;C002;600,00;0,00;-600,00;Absent du nouveau système");
     }
 }

@@ -84,7 +84,65 @@ class FecParserTest {
 
         FecFile file = FecParser.parse("test.txt", utf8(fec));
 
-        assertThat(file.warnings()).singleElement().asString().contains("OD 7").contains("1.00");
+        assertThat(file.warnings()).singleElement().asString().contains("OD 7").contains("1,00 €");
+    }
+
+    @Test
+    void readsADateOutOfFormatButSaysSo() {
+        String fec = HEADER + "\nOD|x|1|12/04/2025|512000||||||x|1,00|0,00|||||\nOD|x|1|20250412|101000||||||x|0,00|1,00|||||\n";
+
+        FecFile file = FecParser.parse("test.txt", utf8(fec));
+
+        assertThat(file.entries().get(0).ecritureDate()).isEqualTo(LocalDate.of(2025, 4, 12));
+        assertThat(file.warnings()).singleElement().asString().contains("1 ligne(s)").contains("AAAAMMJJ");
+    }
+
+    @Test
+    void readsAFileResavedFromASpreadsheet() {
+        String fec = "\"JournalCode\";\"EcritureNum\";\"EcritureDate\";\"CompteNum\";\"Debit\";\"Credit\"\r\n"
+                + "\"VE\";\"1\";\"20260101\";\"411000\";\"1.234,56\";\"0\"\r\n"
+                + "\"VE\";\"1\";\"20260101\";\"706000\";\"0\";\"1 234,56\"\r\n";
+
+        FecFile file = FecParser.parse("excel.csv", utf8(fec));
+
+        assertThat(file.separator()).isEqualTo(';');
+        assertThat(file.entries().get(0).compteNum()).isEqualTo("411000");
+        assertThat(file.entries().get(0).debit()).isEqualByComparingTo("1234.56");
+        assertThat(file.entries().get(1).credit()).isEqualByComparingTo("1234.56");
+        assertThat(file.warnings()).anySatisfy(w -> assertThat(w).contains("« ; »"));
+    }
+
+    @Test
+    void readsWindowsEncodingFromSage() {
+        String fec = HEADER.replace('|', '\t') + "\r\n"
+                + "AC\tAchats\t1\t20260310\t607000\tAchats d’œuvres\t\t\tB1\t20260310\tx\t800,00\t0,00\t\t\t\t\t\r\n"
+                + "AC\tAchats\t1\t20260310\t401000\tFournisseurs\t\t\tB1\t20260310\tx\t0,00\t800,00\t\t\t\t\t\r\n";
+
+        FecFile file = FecParser.parse("sage.txt", fec.getBytes(Charset.forName("windows-1252")));
+
+        assertThat(file.encoding()).isEqualTo("windows-1252");
+        assertThat(file.entries().get(0).compteLib()).isEqualTo("Achats d’œuvres");
+    }
+
+    @Test
+    void skipsAHeaderRepeatedInTheMiddle() {
+        String fec = HEADER + "\nOD|x|1|20260101|512000||||||x|1,00|0,00|||||\n" + HEADER
+                + "\nOD|x|1|20260101|101000||||||x|0,00|1,00|||||\n";
+
+        FecFile file = FecParser.parse("test.txt", utf8(fec));
+
+        assertThat(file.entries()).hasSize(2);
+        assertThat(file.warnings()).anySatisfy(w -> assertThat(w).contains("en-tête répétée"));
+    }
+
+    @Test
+    void stillRefusesALineWithoutAccount() {
+        String fec = HEADER + "\nOD|x|1|20260101|||||||x|1,00|0,00|||||\n";
+
+        assertThatThrownBy(() -> FecParser.parse("test.txt", utf8(fec)))
+                .isInstanceOf(FecFormatException.class)
+                .hasMessageContaining("ligne 2")
+                .hasMessageContaining("compte vide");
     }
 
     @Test
@@ -96,18 +154,8 @@ class FecParserTest {
     }
 
     @Test
-    void namesTheLineOfABadDate() {
-        String fec = HEADER + "\nOD|x|1|2026-01-01|512000||||||x|1,00|0,00|||||\n";
-
-        assertThatThrownBy(() -> FecParser.parse("test.txt", utf8(fec)))
-                .isInstanceOf(FecFormatException.class)
-                .hasMessageContaining("ligne 2")
-                .hasMessageContaining("AAAAMMJJ");
-    }
-
-    @Test
     void refusesAFileWithoutSeparator() {
-        assertThatThrownBy(() -> FecParser.parse("x.txt", utf8("JournalCode;EcritureNum\n")))
+        assertThatThrownBy(() -> FecParser.parse("x.txt", utf8("JournalCode,EcritureNum\n")))
                 .isInstanceOf(FecFormatException.class)
                 .hasMessageContaining("tabulation");
     }
