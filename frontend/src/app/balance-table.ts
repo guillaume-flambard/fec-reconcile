@@ -8,7 +8,7 @@ import { Line, STATUS_LABELS } from './report';
   imports: [DecimalPipe],
   template: `
     @if (lines().length === 0) {
-      <p class="none">Aucun écart.</p>
+      <p class="none">Aucune ligne dans les fichiers.</p>
     } @else {
       <div class="table-wrap" tabindex="0" [attr.aria-label]="caption()">
         <table>
@@ -37,9 +37,7 @@ import { Line, STATUS_LABELS } from './report';
                 <td class="num">{{ l.oldBalance | number: '1.2-2' }}</td>
                 <td class="num">{{ l.newBalance | number: '1.2-2' }}</td>
                 <td class="num">{{ l.difference | number: '1.2-2' }}</td>
-                <td>
-                  <span class="badge" [class.badge-ok]="l.status === 'OK'">{{ labels[l.status] }}</span>
-                </td>
+                <td class="status" [class.status-ok]="l.status === 'OK'">{{ labels[l.status] }}</td>
               </tr>
             }
           </tbody>
