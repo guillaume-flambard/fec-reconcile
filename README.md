@@ -20,7 +20,12 @@ comparison works on balances per account and per third party.
 
 ## Run it
 
-Requirements: Java 17 or later, Node 22.22 or later.
+Requirements: JDK 25 or later (the build refuses an older one), Node 22.22 or later.
+On macOS with Homebrew: `brew install openjdk@25`, then point `JAVA_HOME` at it:
+
+```bash
+export JAVA_HOME=$(brew --prefix openjdk@25)/libexec/openjdk.jdk/Contents/Home
+```
 
 ```bash
 cd backend && ./mvnw spring-boot:run      # API on http://127.0.0.1:8080
@@ -52,7 +57,7 @@ cd frontend && npx ng lint && npx ng test --watch=false && npx ng build
 
 ## Stack
 
-Java 17, Spring Boot 4.2, Maven; Angular 22 (standalone, zoneless, signals), Vitest, angular-eslint.
+Java 25, Spring Boot 4.2, Maven; Angular 22 (standalone, zoneless, signals), Vitest, angular-eslint.
 
 ## Licence
 
